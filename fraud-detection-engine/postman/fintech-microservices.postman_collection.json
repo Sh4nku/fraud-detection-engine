@@ -1,0 +1,550 @@
+{
+  "info": {
+    "name": "Fintech Microservices - Payment & Fraud",
+    "description": "Complete API collection for Payment Processing Service and Fraud Detection Engine",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "payment_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "fraud_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Payment Processing Service",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Generate Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.collectionVariables.set('token', response.token);",
+                      "pm.test('Token generated', function() {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(response.token).to.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"ashish\"\n}"
+                },
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/auth/token",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "auth", "token"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Accounts",
+          "item": [
+            {
+              "name": "Create Account",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.collectionVariables.set('source_account', response.accountNumber);",
+                      "pm.test('Account created', function() {",
+                      "    pm.response.to.have.status(201);",
+                      "    pm.expect(response.accountNumber).to.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ownerName\": \"Ashish Singh\",\n  \"email\": \"ashish@payment.com\",\n  \"initialBalance\": 500000.00\n}"
+                },
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Create Second Account",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.collectionVariables.set('dest_account', response.accountNumber);",
+                      "pm.test('Account created', function() {",
+                      "    pm.response.to.have.status(201);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ownerName\": \"Rohit Sharma\",\n  \"email\": \"rohit@payment.com\",\n  \"initialBalance\": 100000.00\n}"
+                },
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Get Account",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts/{{source_account}}",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts", "{{source_account}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Balance",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts/{{source_account}}/balance",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts", "{{source_account}}", "balance"]
+                }
+              }
+            },
+            {
+              "name": "Get All Accounts",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Update Account Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/accounts/{{source_account}}/status?status=ACTIVE",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "accounts", "{{source_account}}", "status"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "ACTIVE"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Transactions",
+          "item": [
+            {
+              "name": "Transfer Funds (Safe - Low Amount)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.test('Transfer successful', function() {",
+                      "    pm.response.to.have.status(201);",
+                      "    pm.expect(response.status).to.equal('SUCCESS');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sourceAccountNumber\": \"{{source_account}}\",\n  \"destinationAccountNumber\": \"{{dest_account}}\",\n  \"amount\": 2000.00,\n  \"description\": \"Safe transfer\",\n  \"idempotencyKey\": \"TXN-SAFE-001\"\n}"
+                },
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/transactions/transfer",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "transactions", "transfer"]
+                }
+              }
+            },
+            {
+              "name": "Transfer Funds (Suspicious - High Amount)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.collectionVariables.set('fraud_txn_id', response.id);",
+                      "pm.test('Transfer successful', function() {",
+                      "    pm.response.to.have.status(201);",
+                      "    pm.expect(response.status).to.equal('SUCCESS');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sourceAccountNumber\": \"{{source_account}}\",\n  \"destinationAccountNumber\": \"{{dest_account}}\",\n  \"amount\": 80000.00,\n  \"description\": \"Suspicious high amount transfer\",\n  \"idempotencyKey\": \"TXN-FRAUD-003\"\n}"
+                },
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/transactions/transfer",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "transactions", "transfer"]
+                }
+              }
+            },
+            {
+              "name": "Get Transaction",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/transactions/{{fraud_txn_id}}",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "transactions", "{{fraud_txn_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Transactions by Account",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{payment_url}}/api/v1/transactions/account/{{source_account}}",
+                  "host": ["{{payment_url}}"],
+                  "path": ["api", "v1", "transactions", "account", "{{source_account}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fraud Detection Engine",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Generate Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var response = pm.response.json();",
+                      "pm.collectionVariables.set('fraud_token', response.token);",
+                      "pm.test('Token generated', function() {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"analyst\"\n}"
+                },
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/auth/token",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "auth", "token"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fraud Cases",
+          "item": [
+            {
+              "name": "Get All Fraud Cases",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/cases",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "cases"]
+                }
+              }
+            },
+            {
+              "name": "Get Fraud Cases by Status (OPEN)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/cases/status/OPEN",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "cases", "status", "OPEN"]
+                }
+              }
+            },
+            {
+              "name": "Get Fraud Case by Transaction",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/cases/transaction/{{fraud_txn_id}}",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "cases", "transaction", "{{fraud_txn_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Review Fraud Case - Confirm Fraud",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"CONFIRMED_FRAUD\",\n  \"reviewedBy\": \"analyst@hsbc.com\",\n  \"reviewNotes\": \"High amount transfer confirmed fraudulent after investigation\"\n}"
+                },
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/cases/:caseId/review",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "cases", ":caseId", "review"],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "PASTE_CASE_ID_HERE"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Review Fraud Case - False Positive",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"FALSE_POSITIVE\",\n  \"reviewedBy\": \"analyst@hsbc.com\",\n  \"reviewNotes\": \"Customer confirmed legitimate transaction\"\n}"
+                },
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/cases/:caseId/review",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "cases", ":caseId", "review"],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "PASTE_CASE_ID_HERE"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Velocity",
+          "item": [
+            {
+              "name": "Get Velocity Stats",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/velocity/{{source_account}}",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "velocity", "{{source_account}}"]
+                }
+              }
+            },
+            {
+              "name": "Reset Velocity",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{fraud_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{fraud_url}}/api/v1/fraud/velocity/{{source_account}}/reset",
+                  "host": ["{{fraud_url}}"],
+                  "path": ["api", "v1", "fraud", "velocity", "{{source_account}}", "reset"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
